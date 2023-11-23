@@ -6,8 +6,7 @@ function generateRandomNumbers(count) {
         randomNumbers.push(Math.floor(Math.random() * 100));
     }
     return randomNumbers;
-}
-  
+}  
 const initialRandomNumbers = generateRandomNumbers(10);
 const initialBinaryTree = new Tree(initialRandomNumbers);
   
@@ -23,17 +22,12 @@ console.log("In order:", initialBinaryTree.inOrder());
   
 initialBinaryTree.insert(110);
 initialBinaryTree.insert(120);
-initialBinaryTree.insert(130);
-  
+initialBinaryTree.insert(130);  
 prettyPrint(initialBinaryTree.root);
-
-
 console.log("\nIs the tree balanced?", initialBinaryTree.isBalanced());
   
-initialBinaryTree.rebalance();
-  
+initialBinaryTree.rebalance(); 
 prettyPrint(initialBinaryTree.root);
-
 console.log("\nIs the tree balanced after rebalancing?", initialBinaryTree.isBalanced());
   
 console.log("\nRebalanced tree elements:");

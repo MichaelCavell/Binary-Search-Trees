@@ -1,237 +1,237 @@
 export class Node {
     constructor(data) {
-      this.data = data;
-      this.left = null;
-      this.right = null;
+        this.data = data;
+        this.left = null;
+        this.right = null;
     }
 }
 
 export class Tree {
-    constructor(array) {
-      this.root = this.buildTree(array);
+    constructor(data) {
+        this.root = this.buildTree(data);
     }
-  
-    buildTree(array) {
-      if (array.length === 0) {
-        return null;
-      }
-  
-      const middleIndex = Math.floor(array.length / 2);
-      const rootNode = new Node(array[middleIndex]);
-  
-      rootNode.left = this.buildTree(array.slice(0, middleIndex));
-      rootNode.right = this.buildTree(array.slice(middleIndex + 1));
-  
-      return rootNode;
+    
+    buildTree(data) {
+        function buildTreeHelper(sortedData, start, end) {
+            if (start > end) {
+                return null;
+            }
+            
+            const mid = Math.floor((start + end) / 2);
+            const node = new Node(sortedData[mid]);
+            
+            node.left = buildTreeHelper(sortedData, start, mid - 1);
+            node.right = buildTreeHelper(sortedData, mid + 1, end);
+            
+            return node;
+        }
+        
+        const sortedData = this.removeDuplicatesAndSort(data);
+        return buildTreeHelper(sortedData, 0, sortedData.length - 1);
+    }
+    
+    removeDuplicatesAndSort(data) {
+        const uniqueData = [];
+        
+        for (const value of data) {
+            if (!uniqueData.includes(value)) {
+                uniqueData.push(value);
+            }
+        }
+        uniqueData.sort((a, b) => a - b);
+        return uniqueData;
     }
 
     insert(value) {
-        this.root = this.insertRec(this.root, value);
-    }
-    
-    insertRec(node, value) {
-        if (node === null) {
+        this.root = this.insertNode(this.root, value);
+      }
+      
+    insertNode(root, value) {
+        if (root === null) {
             return new Node(value);
         }
-    
-        if (value < node.data) {
-            node.left = this.insertRec(node.left, value);
-        } else if (value > node.data) {
-            node.right = this.insertRec(node.right, value);
+        
+        if (value < root.data) {
+            root.left = this.insertNode(root.left, value);
+        } else if (value > root.data) {
+            root.right = this.insertNode(root.right, value);
         }
     
-        return node;
-      }    
+        return root;
+    }
 
     delete(value) {
-        this.root = this.deleteRec(this.root, value);
+        this.root = this.deleteNode(this.root, value);
     }
-    
-    deleteRec(node, value) {
-        if (node === null) {
+
+    deleteNode(root, value) {
+        if (root === null) {
             return null;
         }
-        
-        if (value < node.data) {
-          node.left = this.deleteRec(node.left, value);
-        } else if (value > node.data) {
-          node.right = this.deleteRec(node.right, value);
+
+        if (value < root.data) {
+            root.left = this.deleteNode(root.left, value);
+        } else if (value > root.data) {
+            root.right = this.deleteNode(root.right, value);
         } else {
-            if (node.left === null) {
-                return node.right;
-            } else if (node.right === null) {
-                return node.left;
+            if (root.left === null) {
+                return root.right;
+            } else if (root.right === null) {
+                return root.left;
             }
-            
-            node.data = this.getMinValue(node.right);
-            node.right = this.deleteRec(node.right, node.data);
+
+            root.data = this.findMinValue(root.right);
+            root.right = this.deleteNode(root.right, root.data);
         }
 
-        return node;
+        return root;
     }
 
-    find(value) {
-        return this.findRec(this.root, value);
-    }
-    
-    findRec(node, value) {
-        if (node === null || node.data === value) {
-            return node;
+    findMinValue(node) {
+        while (node.left !== null) {
+            node = node.left;
         }
-    
-        if (value < node.data) {
-          return this.findRec(node.left, value);
-        } else {
-          return this.findRec(node.right, value);
-        }
-    }
-    
-    levelOrder(callback) {
-        const result = [];
-        const queue = [this.root];
-    
-        while (queue.length > 0) {
-            const current = queue.shift();
-            
-            if (callback) {
-                callback(current);
+        return node.data;
+      }
+      
+    find(data) {
+        let current = this.root
+
+        while(current) {
+            if (data < current.data) {
+                current = current.left;
+            } else if (data > current.data) {
+                current = current.right;
             } else {
-                result.push(current.data);
-            }
-            
-            if (current.left !== null) {
-                queue.push(current.left);
-            }
-            
-            if (current.right !== null) {
-                queue.push(current.right);
+                return current;
             }
         }
-        
-        return result;
-    }   
-    
+    }
+
+    levelOrder(callback) {
+        let queue = [this.root];
+        let levelOrderTraverse = []     
+        while (queue.length != 0) {
+            let node = queue.pop()
+            if (callback) {
+                callback(node);
+            }
+            levelOrderTraverse.push(node.data);
+            if (node.left) queue.unshift(node.left)
+            if (node.right) queue.unshift(node.right)
+        }
+        return levelOrderTraverse;
+    }
+
     inOrder(callback) {
-        const result = [];
-        
+        const inOrderTraverse = [];
         const traverse = (node) => {
-            if (node !== null) {
+            if (node) {
                 traverse(node.left);
-                if (callback) {
-                    callback(node);
-                } else {
-                    result.push(node.data);
-                }
+                if (callback) callback(node);
+                inOrderTraverse.push(node.data);
                 traverse(node.right);
             }
-        };
-        
+        }
         traverse(this.root);
-        return result;
+
+        return inOrderTraverse;
     }
-    
+
     preOrder(callback) {
-        const result = [];
-        
+        const preOrderTraverse = [];
         const traverse = (node) => {
-            if (node !== null) {
-                if (callback) {
-                    callback(node);
-                } else {
-                    result.push(node.data);
-                }
+            if (node) {
+                if (callback) callback(node);
+                preOrderTraverse.push(node.data);
                 traverse(node.left);
                 traverse(node.right);
             }
-        };
-        
+        }
         traverse(this.root);
-        return result;
+
+        return preOrderTraverse;
     }
-    
+
     postOrder(callback) {
-        const result = [];
-    
+        const postOrderTraverse = [];
         const traverse = (node) => {
-            if (node !== null) {
+            if (node) {
                 traverse(node.left);
                 traverse(node.right);
-                if (callback) {
-                    callback(node);
-                } else {
-                    result.push(node.data);
-                }
+                if (callback) callback(node);
+                postOrderTraverse.push(node.data);
             }
-        };
-    
+        }
         traverse(this.root);
-        return result;
-    }   
-    
-    height(node = this.root) {
+
+        return postOrderTraverse;
+    }
+
+    height(node) {    
         if (node === null) {
-          return -1;
+            return -1;
         }
-    
-        const leftHeight = this.height(node.left);
-        const rightHeight = this.height(node.right);
-    
-        return Math.max(leftHeight, rightHeight) + 1;
-    }  
-    
+        
+        const selectedNode = this.find(node);
+        let left = selectedNode.left;
+        let right = selectedNode.right;
+        let lHeight = -1;
+        let rHeight = -1;
+
+        if (left) {
+            lHeight = this.height(left.data);
+        }
+
+        if (right) {
+            rHeight = this.height(right.data);
+        }
+        
+        if (lHeight > rHeight) {
+            return (lHeight + 1);
+        } else {
+            return (rHeight + 1);
+        }
+    }
+
     depth(node) {
-        return this.depthRec(this.root, node);
+        let current = this.root
+        let depthCount = 0;
+        while(current) {
+            if (node < current.data) {
+                current = current.left;
+                depthCount++
+            } else if (node > current.data) {
+                current = current.right;
+                depthCount++
+            } else {
+                return depthCount;
+            }
+        }
     }
-    
-    depthRec(current, target, currentDepth = 0) {
-        if (current === null) {
-            return -1; // Node not found
-        }
 
-        if (current === target) {
-            return currentDepth;
-        }
-
-        const leftDepth = this.depthRec(current.left, target, currentDepth + 1);
-        const rightDepth = this.depthRec(current.right, target, currentDepth + 1);
-
-        return Math.max(leftDepth, rightDepth);
-    }  
-    
     isBalanced() {
-        return this.checkBalanced(this.root);
-    }
-    
-    checkBalanced(node) {
-        if (node === null) {
+        const current = this.root
+
+        const lNode = (current.left).data
+        const rNode = (current.right).data
+
+        const lHeight = this.height(lNode);
+        const rHeight = this.height(rNode);
+
+        if (Math.abs(lHeight - rHeight) <= 1) {
             return true;
+        } else {
+            return false;
         }
-    
-        const leftHeight = this.height(node.left);
-        const rightHeight = this.height(node.right);
-    
-        if (Math.abs(leftHeight - rightHeight) <= 1 &&
-        this.checkBalanced(node.left) &&
-        this.checkBalanced(node.right)) {
-            return true;
-        }
-    
-        return false;
     }
 
     rebalance() {
         const values = this.inOrder();
         this.root = this.buildTree(values);
-      }
-    
-    getMinValue(node) {
-        let current = node;
-        while (current.left !== null) {
-            current = current.left;
-        }
-        return current.data;
-      }
-    }    
+    }
+
+}
 
 export const prettyPrint = (node, prefix = "", isLeft = true) => {
     if (node === null) {
